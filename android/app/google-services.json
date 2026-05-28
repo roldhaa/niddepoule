@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "345147549098",
+    "project_id": "civicroadprod",
+    "storage_bucket": "civicroadprod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:345147549098:android:70333827066a815b85b7d3",
+        "android_client_info": {
+          "package_name": "com.example.niddepoule"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "345147549098-44cqebntc9t4bieqse5uocpvmeau6g1j.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVF6boSkzjgz00Hm7mFZse9MEBWCJ1syM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "345147549098-44cqebntc9t4bieqse5uocpvmeau6g1j.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "345147549098-6m6ptn9um3tm3ah1j5a196cimtgp1g2e.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.niddepoule"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

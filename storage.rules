@@ -1,0 +1,26 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    function isSignedIn() { return request.auth != null; }
+    function isImage() { return request.resource.contentType.matches('image/.*'); }
+    function underLimit() { return request.resource.size < 10 * 1024 * 1024; } // 10MB
+
+    // Public read for app media
+    match /report_photos/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn()
+        && request.auth.uid == userId
+        && isImage()
+        && underLimit();
+    }
+
+    match /profile_photos/{userId}/{fileName} {
+      allow read: if true;
+      allow write: if isSignedIn()
+        && request.auth.uid == userId
+        && isImage()
+        && underLimit();
+    }
+  }
+}
+

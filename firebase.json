@@ -1,0 +1,48 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "civicroadprod",
+          "appId": "1:345147549098:android:70333827066a815b85b7d3",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "civicroadprod",
+          "appId": "1:345147549098:ios:bf97d586259a701085b7d3",
+          "uploadDebugSymbols": false,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "macos": {
+        "default": {
+          "projectId": "civicroadprod",
+          "appId": "1:345147549098:ios:bf97d586259a701085b7d3",
+          "uploadDebugSymbols": false,
+          "fileOutput": "macos/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "civicroadprod",
+          "configurations": {
+            "android": "1:345147549098:android:70333827066a815b85b7d3",
+            "ios": "1:345147549098:ios:bf97d586259a701085b7d3",
+            "macos": "1:345147549098:ios:bf97d586259a701085b7d3",
+            "web": "1:345147549098:web:01d607f65b60394685b7d3",
+            "windows": "1:345147549098:web:8f971e36bdac34f885b7d3"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}
