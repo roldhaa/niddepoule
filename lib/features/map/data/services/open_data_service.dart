@@ -43,14 +43,18 @@ class OpenDataService {
       final now = DateTime.now();
       int offset = 0;
       const int pageSize = 1000;
+      int pageCount = 0;
+      final int maxPages = (limit / pageSize).ceil() + 5;
 
-      while (parsedPotholes.length < limit) {
+      while (parsedPotholes.length < limit && pageCount < maxPages) {
+        pageCount++;
         final uri = Uri.parse(
           'https://donnees.montreal.ca/api/3/action/datastore_search'
           '?resource_id=2cfa0e06-9be4-49a6-b7f1-ee9f2363a872'
           '&q=Nid-de-poule'
           '&limit=$pageSize'
-          '&offset=$offset',
+          '&offset=$offset'
+          '&sort=DDS_DATE_CREATION%20desc',
         );
 
         final request = await client.getUrl(uri);
