@@ -19,14 +19,11 @@ class OpenDataService {
       const int pageSize = 1000;
 
       while (parsedPotholes.length < limit) {
-        final currentLimit = (limit - parsedPotholes.length).clamp(0, pageSize);
-        if (currentLimit <= 0) break;
-
         final uri = Uri.parse(
           'https://donnees.montreal.ca/api/3/action/datastore_search'
           '?resource_id=2cfa0e06-9be4-49a6-b7f1-ee9f2363a872'
           '&q=Nid-de-poule'
-          '&limit=$currentLimit'
+          '&limit=$pageSize'
           '&offset=$offset',
         );
 
@@ -51,6 +48,15 @@ class OpenDataService {
 
         for (final record in records) {
           final Map<String, dynamic> data = record as Map<String, dynamic>;
+
+          // Skip repaired, cancelled, refused or deleted reports
+          final lastStatus = data['DERNIER_STATUT']?.toString() ?? '';
+          if (lastStatus == 'Terminée' || 
+              lastStatus == 'Annulée' || 
+              lastStatus == 'Refusée' || 
+              lastStatus == 'Supprimée') {
+            continue;
+          }
 
           final lat = double.tryParse(data['LOC_LAT']?.toString() ?? '') ?? 0.0;
           final lon = double.tryParse(data['LOC_LONG']?.toString() ?? '') ?? 0.0;
