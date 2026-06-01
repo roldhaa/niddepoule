@@ -326,188 +326,306 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   Widget _buildDetailsCard(Pothole pothole) {
-    final dangerLabel = DangerColors.label(pothole.dangerLevel);
+    // Generate appropriate French labels and colors for the danger level
+    final String dangerLabel = switch (pothole.dangerLevel) {
+      DangerLevel.high => 'Danger élevé',
+      DangerLevel.medium => 'Danger moyen',
+      DangerLevel.low => 'Danger faible',
+    };
+
+    final Color dangerColor = switch (pothole.dangerLevel) {
+      DangerLevel.high => const Color(0xFFFF3B30),
+      DangerLevel.medium => const Color(0xFFFF9500),
+      DangerLevel.low => const Color(0xFF34C759),
+    };
+
+    // Format street name: Title Case for names from open data
+    String formatStreet(String? rawStreet) {
+      if (rawStreet == null || rawStreet.trim().isEmpty) {
+        return 'Rue Dalphond';
+      }
+      final clean = rawStreet.trim();
+      return clean.split(' ').map((word) {
+        if (word.isEmpty) return '';
+        // If word has dashes, capitalize both parts (e.g. Jean-Talon)
+        if (word.contains('-')) {
+          return word.split('-').map((subWord) {
+            if (subWord.isEmpty) return '';
+            return subWord[0].toUpperCase() + subWord.substring(1).toLowerCase();
+          }).join('-');
+        }
+        return word[0].toUpperCase() + word.substring(1).toLowerCase();
+      }).join(' ');
+    }
+
+    final String streetName = formatStreet(pothole.street);
+
+    // Calculate dynamic distance to the pothole if user position is available
+    String distanceStr = '123 m';
+    if (_userPosition != null) {
+      final double distanceInMeters = geo.Geolocator.distanceBetween(
+        _userPosition!.latitude,
+        _userPosition!.longitude,
+        pothole.latitude,
+        pothole.longitude,
+      );
+      if (distanceInMeters >= 1000) {
+        distanceStr = '${(distanceInMeters / 1000).toStringAsFixed(1)} km';
+      } else {
+        distanceStr = '${distanceInMeters.round()} m';
+      }
+    }
 
     // List of real pothole photos from Unsplash for display
-    final List<String> potholeImages = [
-      'https://images.unsplash.com/photo-1619537901462-a6292f2e41fc?q=80&w=300',
-      'https://images.unsplash.com/photo-1596489370830-dfa053c9f2be?q=80&w=300',
-      'https://images.unsplash.com/photo-1621293954908-907141448d37?q=80&w=300',
-      'https://images.unsplash.com/photo-1584467541268-b029fb34de4e?q=80&w=300',
-    ];
+    final List<String> potholeImages = pothole.photoUrls.isNotEmpty 
+        ? pothole.photoUrls 
+        : [
+            'https://images.unsplash.com/photo-1619537901462-a6292f2e41fc?q=80&w=300',
+            'https://images.unsplash.com/photo-1596489370830-dfa053c9f2be?q=80&w=300',
+            'https://images.unsplash.com/photo-1621293954908-907141448d37?q=80&w=300',
+            'https://images.unsplash.com/photo-1584467541268-b029fb34de4e?q=80&w=300',
+          ];
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F1015).withValues(alpha: 0.95), // Premium carbon-black card background
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(28),
-          topRight: Radius.circular(28),
-          bottomLeft: Radius.circular(28),
-          bottomRight: Radius.circular(28),
-        ),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.08), width: 1),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.6),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
-          )
-        ],
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // 1. Drag Handle (tap to close)
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                _selectedPothole = null;
-              });
-            },
-            behavior: HitTestBehavior.opaque,
-            child: Center(
-              child: Container(
-                width: 36,
-                height: 4,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.3),
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        // Main Card Container
+        Container(
+          padding: const EdgeInsets.fromLTRB(16, 20, 16, 16),
+          decoration: BoxDecoration(
+            color: const Color(0xFF0F1015), // Premium deep dark card background
+            borderRadius: BorderRadius.circular(28),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.08),
+              width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.6),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              )
+            ],
           ),
-
-          // 2. Street Name and 9.2 Rating Badge
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Text(
-                  pothole.city ?? 'Rue Dalphond',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20,
-                    letterSpacing: -0.5,
+              const SizedBox(height: 4),
+              // Row 1: Street Name and Danger Score Badge
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      streetName,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
                   ),
+                  const SizedBox(width: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF9E1A1A), // Dark crimson red pill
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Text(
+                      pothole.dangerScore.toStringAsFixed(1),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+
+              // Row 2: Category & Danger Level Label
+              Text.rich(
+                TextSpan(
+                  children: [
+                    const TextSpan(
+                      text: 'Nid-de-poule  •  ',
+                      style: TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
+                      ),
+                    ),
+                    TextSpan(
+                      text: dangerLabel,
+                      style: TextStyle(
+                        color: dangerColor,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.red[700]!,
-                  borderRadius: BorderRadius.circular(16),
+              const SizedBox(height: 4),
+
+              // Row 3: Distance and Report Count
+              Text(
+                '$distanceStr  •  Signalé ${pothole.reportCount} fois',
+                style: const TextStyle(
+                  color: Colors.white54,
+                  fontSize: 12,
                 ),
-                child: const Text(
-                  '9.2',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
+              ),
+              const SizedBox(height: 12),
+
+              // Row 4: Horizontal Scrollable Images Gallery
+              SizedBox(
+                height: 76,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: potholeImages.length,
+                  itemBuilder: (context, idx) {
+                    return Container(
+                      width: 105,
+                      margin: const EdgeInsets.only(right: 8),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.network(
+                          potholeImages[idx],
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              child: const Center(
+                                child: SizedBox(
+                                  width: 16,
+                                  height: 16,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white30),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.white.withValues(alpha: 0.05),
+                              child: const Center(
+                                child: Icon(
+                                  Icons.broken_image_outlined,
+                                  color: Colors.white30,
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              // Row 5: Action Button: "Voir les détails"
+              InkWell(
+                onTap: () {
+                  context.push('/pothole/${pothole.id}');
+                },
+                borderRadius: BorderRadius.circular(24),
+                child: Container(
+                  height: 46,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.12),
+                      width: 1.2,
+                    ),
+                  ),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Opacity(
+                        opacity: 0.0,
+                        child: Icon(Icons.chevron_right_rounded, size: 20),
+                      ),
+                      Text(
+                        'Voir les détails',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ],
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 4),
+        ),
 
-          // 3. Subtitle Info: Nid-de-poule · Danger élevé
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(
-                  text: 'Nid-de-poule  •  ',
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
-                ),
-                TextSpan(
-                  text: dangerLabel,
-                  style: const TextStyle(
-                    color: Colors.redAccent,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 13,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 4),
-
-          // 4. Distance and Report Count
-          const Text(
-            '123 m  •  Signalé 14 fois',
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: 12,
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // 5. Horizontal list of images
-          SizedBox(
-            height: 76,
-            child: ListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: potholeImages.length,
-              itemBuilder: (context, idx) {
-                return Container(
-                  width: 105,
-                  margin: const EdgeInsets.only(right: 8),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    image: DecorationImage(
-                      image: NetworkImage(potholeImages[idx]),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                );
+        // Centered upper tab sticking out of the card top border
+        Positioned(
+          top: -12,
+          left: 0,
+          right: 0,
+          child: Center(
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _selectedPothole = null;
+                });
               },
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // 6. Action Button: "Voir les détails" full-width
-          InkWell(
-            onTap: () {
-              context.push('/pothole/${pothole.id}');
-            },
-            borderRadius: BorderRadius.circular(24),
-            child: Container(
-              height: 46,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  width: 1.2,
+              behavior: HitTestBehavior.opaque,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF0F1015),
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                  border: Border(
+                    top: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+                    left: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+                    right: BorderSide(color: Colors.white.withValues(alpha: 0.08), width: 1),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.check_rounded,
+                      color: Colors.white70,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      width: 32,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Spacer(),
-                  Text(
-                    'Voir les détails',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
-                  Spacer(),
-                  Icon(
-                    Icons.chevron_right_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ],
-              ),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -631,12 +749,22 @@ class _MapCanvasState extends State<_MapCanvas> {
   }
 
   void _centerCameraOnUser() {
-    final pos = widget.userPosition;
-    if (_mapboxMap != null && pos != null) {
-      _mapboxMap?.setCamera(mb.CameraOptions(
-        center: mb.Point(coordinates: mb.Position(pos.longitude, pos.latitude)),
-        zoom: 14.0,
-      ));
+    if (_mapboxMap != null) {
+      if (widget.potholes.isNotEmpty) {
+        final p = widget.potholes.first;
+        _mapboxMap?.setCamera(mb.CameraOptions(
+          center: mb.Point(coordinates: mb.Position(p.longitude, p.latitude)),
+          zoom: 14.5,
+        ));
+      } else {
+        final pos = widget.userPosition;
+        if (pos != null) {
+          _mapboxMap?.setCamera(mb.CameraOptions(
+            center: mb.Point(coordinates: mb.Position(pos.longitude, pos.latitude)),
+            zoom: 14.0,
+          ));
+        }
+      }
     }
   }
 

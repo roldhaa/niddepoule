@@ -15,6 +15,7 @@ class Pothole {
     required this.lastReportedAt,
     this.photoUrls = const [],
     this.city,
+    this.street,
     this.repairedAt,
   });
 
@@ -29,7 +30,22 @@ class Pothole {
   final DateTime lastReportedAt;
   final List<String> photoUrls;
   final String? city;
+  final String? street;
   final DateTime? repairedAt;
+
+  /// Deterministic danger score based on the unique pothole ID and dangerLevel.
+  double get dangerScore {
+    final int hashVal = id.hashCode.abs();
+    final double mod = (hashVal % 15) / 10.0; // range 0.0 to 1.4
+    switch (dangerLevel) {
+      case DangerLevel.high:
+        return 8.5 + mod; // 8.5 to 9.9
+      case DangerLevel.medium:
+        return 5.0 + (hashVal % 30) / 10.0; // 5.0 to 7.9
+      case DangerLevel.low:
+        return 1.0 + (hashVal % 30) / 10.0; // 1.0 to 3.9
+    }
+  }
 
   Pothole copyWith({
     String? id,
@@ -43,6 +59,7 @@ class Pothole {
     DateTime? lastReportedAt,
     List<String>? photoUrls,
     String? city,
+    String? street,
     DateTime? repairedAt,
   }) {
     return Pothole(
@@ -57,6 +74,7 @@ class Pothole {
       lastReportedAt: lastReportedAt ?? this.lastReportedAt,
       photoUrls: photoUrls ?? this.photoUrls,
       city: city ?? this.city,
+      street: street ?? this.street,
       repairedAt: repairedAt ?? this.repairedAt,
     );
   }
@@ -72,6 +90,7 @@ class Pothole {
         'lastReportedAt': FirestoreMapper.timestampFromDate(lastReportedAt),
         'photoUrls': photoUrls,
         'city': city,
+        'street': street,
         'repairedAt': FirestoreMapper.timestampFromNullableDate(repairedAt),
       };
 
@@ -91,6 +110,7 @@ class Pothole {
       lastReportedAt: FirestoreMapper.dateFromDynamic(map['lastReportedAt']),
       photoUrls: FirestoreMapper.stringListFromDynamic(map['photoUrls']),
       city: map['city'] as String?,
+      street: map['street'] as String?,
       repairedAt: map['repairedAt'] == null
           ? null
           : FirestoreMapper.dateFromDynamic(map['repairedAt']),

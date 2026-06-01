@@ -110,12 +110,13 @@ class OpenDataService {
           'longitude': lon,
           'geohash': geohash,
           'dangerLevel': dangerLevel.name,
-          'reportCount': (uniqueId.hashCode % 3) + 1,
+          'reportCount': (uniqueId.hashCode % 12) + 3, // generating realistic report counts between 3 and 14
           'status': 'open',
           'firstReportedAt': Timestamp.fromDate(firstReported),
           'lastReportedAt': Timestamp.fromDate(lastReported),
           'photoUrls': <String>[],
           'city': 'Montréal',
+          'street': data['RUE']?.toString(),
           'repairedAt': null,
         });
       }
