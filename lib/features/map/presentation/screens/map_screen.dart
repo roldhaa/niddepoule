@@ -112,9 +112,9 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                     Expanded(child: _buildTopSearchBar()),
                     const SizedBox(width: 8),
                     _buildTopIconButton(
-                      icon: Icons.notifications_none_rounded,
+                      icon: Icons.leaderboard_outlined,
                       onTap: () {
-                        context.push('/home/alerts');
+                        context.push('/home/leaderboard');
                       },
                       showBadge: true,
                     ),

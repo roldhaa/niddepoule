@@ -9,7 +9,7 @@ import 'package:niddepoule/features/auth/presentation/screens/register_screen.da
 import 'package:niddepoule/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:niddepoule/features/feed/presentation/screens/feed_screen.dart';
 import 'package:niddepoule/features/map/presentation/screens/map_screen.dart';
-import 'package:niddepoule/features/alerts/presentation/screens/alerts_screen.dart';
+import 'package:niddepoule/features/leaderboard/presentation/screens/leaderboard_screen.dart';
 import 'package:niddepoule/features/potholes/presentation/screens/pothole_details_screen.dart';
 import 'package:niddepoule/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:niddepoule/features/profile/presentation/screens/profile_screen.dart';
@@ -121,8 +121,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/home/alerts',
-                builder: (context, state) => const AlertsScreen(),
+                path: '/home/leaderboard',
+                builder: (context, state) => const LeaderboardScreen(),
               ),
             ],
           ),

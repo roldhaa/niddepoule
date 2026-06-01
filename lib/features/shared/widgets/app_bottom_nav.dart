@@ -34,7 +34,7 @@ class AppBottomNav extends StatelessWidget {
                   _buildNavItem(0, Icons.home_outlined, Icons.home_rounded, 'Carte'),
                   _buildNavItem(1, Icons.feed_outlined, Icons.feed_rounded, 'Feed'),
                   _buildCenterButton(),
-                  _buildNavItem(3, Icons.notifications_outlined, Icons.notifications_rounded, 'Alertes'),
+                  _buildNavItem(3, Icons.leaderboard_outlined, Icons.leaderboard_rounded, 'Classement'),
                   _buildNavItem(4, Icons.person_outline_rounded, Icons.person_rounded, 'Profil'),
                 ],
               ),
