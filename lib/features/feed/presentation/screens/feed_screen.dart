@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:niddepoule/app/design_system/app_colors.dart';
 import 'package:niddepoule/app/design_system/app_spacing.dart';
 import 'package:niddepoule/core/widgets/civic_scaffold.dart';
@@ -270,7 +271,15 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with SingleTickerProvid
           // Location Tag (Capsule Button)
           if (locationTag != null) ...[
             GestureDetector(
-              onTap: () {},
+              onTap: () {
+                if (locationTag == 'Rue Radisson') {
+                  context.push('/pothole/26-176912');
+                } else if (locationTag == 'Pont de la 50e Avenue') {
+                  context.push('/pothole/26-176868');
+                } else {
+                  context.push('/pothole/26-176947');
+                }
+              },
               child: Container(
                 margin: const EdgeInsets.only(bottom: 12.0),
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),

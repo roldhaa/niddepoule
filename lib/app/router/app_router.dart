@@ -4,7 +4,6 @@ import 'package:niddepoule/core/providers/core_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niddepoule/app/design_system/app_durations.dart';
-import 'package:niddepoule/features/auth/presentation/providers/auth_providers.dart';
 import 'package:niddepoule/features/auth/presentation/screens/login_screen.dart';
 import 'package:niddepoule/features/auth/presentation/screens/register_screen.dart';
 import 'package:niddepoule/features/auth/presentation/screens/welcome_screen.dart';
@@ -81,7 +80,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         path: '/report',
         pageBuilder: (context, state) => _fadeSlidePage(
-          key: state.pageKey,
+          key: ValueKey('root_report_pothole_${state.uri.queryParameters['potholeId'] ?? 'new'}'),
           child: ReportPotholeScreen(
             potholeId: state.uri.queryParameters['potholeId'],
             redirectPath: state.uri.queryParameters['redirect'],

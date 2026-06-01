@@ -48,12 +48,16 @@ class ReportService {
   Stream<List<Report>> watchReportsForPothole(String potholeId) {
     return _reports
         .where('duplicateGroupId', isEqualTo: potholeId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
         .map(
-          (snapshot) => snapshot.docs
-              .map((doc) => Report.fromMap(doc.data(), id: doc.id))
-              .toList(),
+          (snapshot) {
+            final list = snapshot.docs
+                .map((doc) => Report.fromMap(doc.data(), id: doc.id))
+                .toList();
+            // Sort in memory to avoid needing a Firestore composite index
+            list.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+            return list;
+          },
         );
   }
 
