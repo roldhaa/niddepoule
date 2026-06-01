@@ -1738,8 +1738,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
         Slider(
           value: _openDataImportLimit,
           min: 50,
-          max: 1000,
-          divisions: 19, // Division steps of 50
+          max: 5000,
+          divisions: 99, // Division steps of 50
           activeColor: AppColors.brandOrange,
           inactiveColor: AppColors.brandBlackSoft,
           onChanged: _openDataImporting
@@ -1750,6 +1750,15 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   });
                 },
         ),
+        if (_openDataImportLimit > 1000)
+          const Padding(
+            padding: EdgeInsets.only(bottom: 12),
+            child: Text(
+              'Attention : L\'importation d\'un grand volume consomme des écritures Firestore et peut ralentir le rendu de la carte.',
+              style: TextStyle(color: Colors.amber, fontSize: 11, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
+            ),
+          ),
         const SizedBox(height: 40),
 
         // Action Button
