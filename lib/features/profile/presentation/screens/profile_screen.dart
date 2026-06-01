@@ -5,6 +5,8 @@ import 'package:niddepoule/app/design_system/app_spacing.dart';
 import 'package:niddepoule/app/design_system/app_radius.dart';
 import 'package:niddepoule/core/widgets/civic_scaffold.dart';
 import 'package:niddepoule/core/widgets/civic_button.dart';
+import 'package:niddepoule/core/widgets/civic_bottom_sheet.dart';
+import 'package:niddepoule/core/providers/core_providers.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -24,6 +26,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   double _damageEstimateMax = 1250;
   int _selectedCategoryIndex = 0;
 
+  // State for Open Data Ingestion
+  double _openDataImportLimit = 150.0;
+  bool _openDataImporting = false;
+  int? _openDataImportedCount;
+
   @override
   Widget build(BuildContext context) {
     if (_currentSubView == 'achievements') {
@@ -32,6 +39,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       return _buildLeaderboardView();
     } else if (_currentSubView == 'claim') {
       return _buildClaimWizardView();
+    } else if (_currentSubView == 'open_data') {
+      return _buildOpenDataView();
     }
 
     return CivicScaffold(
@@ -95,11 +104,66 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   _buildHeaderIconButton(
                     Icons.settings_rounded,
                     onTap: () {
-                      setState(() {
-                        _currentSubView = 'claim';
-                        _claimStep = 1;
-                        _damagedParts.clear();
-                      });
+                      showCivicBottomSheet(
+                        context: context,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Outils & Paramètres',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                fontFamily: 'Outfit',
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 16),
+                            ListTile(
+                              leading: const Icon(Icons.picture_as_pdf_outlined, color: AppColors.brandOrange),
+                              title: const Text(
+                                'Dossier de sinistre (311)',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: const Text(
+                                'Générer un PDF de réclamation pré-rempli pour la ville.',
+                                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                setState(() {
+                                  _currentSubView = 'claim';
+                                  _claimStep = 1;
+                                  _damagedParts.clear();
+                                });
+                              },
+                            ),
+                            const Divider(color: Colors.white10),
+                            ListTile(
+                              leading: const Icon(Icons.cloud_download_outlined, color: Colors.green),
+                              title: const Text(
+                                'Données Ouvertes (Open Data)',
+                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: const Text(
+                                'Pré-remplir la carte avec des nids-de-poule réels de Montréal.',
+                                style: TextStyle(color: AppColors.textSecondary, fontSize: 12),
+                              ),
+                              onTap: () {
+                                Navigator.pop(context);
+                                setState(() {
+                                  _currentSubView = 'open_data';
+                                  _openDataImportLimit = 150.0;
+                                  _openDataImporting = false;
+                                  _openDataImportedCount = null;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
+                      );
                     },
                   ),
                 ],
@@ -110,12 +174,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 110), // Push the avatar/status section to overlap the header
-                
-                // Avatar & Custom Status Row
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Row(
+                const SizedBox(height: 90), // Push the avatar/status section to overlap the header
+                Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: AppColors.brandBlack, // Same background color as the app
+                    borderRadius: const BorderRadius.only(
+                      topLeft: Radius.circular(24),
+                      topRight: Radius.circular(24),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 16),
+                      // Avatar & Custom Status Row
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
                       // Avatar with status indicator
@@ -430,6 +506,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ),
 
                 const SizedBox(height: 100), // Bottom navigation padding
+                    ],
+                  ),
+                ),
               ],
             ),
           ],
@@ -1508,6 +1587,259 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               ),
               onPressed: () {
                 setState(() {
+                  _currentSubView = 'profile';
+                });
+              },
+              child: const Text('Fermer', style: TextStyle(fontWeight: FontWeight.bold)),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  // 4. OPEN DATA PORTAL VIEW
+  Widget _buildOpenDataView() {
+    return CivicScaffold(
+      title: 'Données Ouvertes 311',
+      leading: IconButton(
+        onPressed: () {
+          setState(() {
+            _currentSubView = 'profile';
+          });
+        },
+        icon: const Icon(Icons.arrow_back),
+      ),
+      body: _buildOpenDataContent(),
+    );
+  }
+
+  Widget _buildOpenDataContent() {
+    if (_openDataImportedCount != null) {
+      return _buildOpenDataSuccessView();
+    }
+
+    return ListView(
+      padding: const EdgeInsets.all(AppSpacing.md),
+      children: [
+        const Text(
+          'Pré-remplir la carte avec des données réelles',
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+            fontFamily: 'Outfit',
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Aspirez les requêtes citoyennes 311 de nids-de-poule enregistrées en temps réel par les municipalités.',
+          style: TextStyle(
+            color: AppColors.textSecondary,
+            fontSize: 13,
+            fontFamily: 'Outfit',
+          ),
+        ),
+        const SizedBox(height: 24),
+
+        // Portal Info Card
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: AppColors.brandBlackSoft,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: AppColors.border.withValues(alpha: 0.15)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.15),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.cloud_queue_rounded, color: Colors.green, size: 20),
+                  ),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Source : Données Québec (Montréal)',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          'Jeu de données officiel : Requêtes 311 (2022 à ce jour)',
+                          style: TextStyle(
+                            color: Colors.white54,
+                            fontSize: 11,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              const Divider(color: Colors.white10, height: 1),
+              const SizedBox(height: 16),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Total disponible', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text(
+                    '61 981 nids-de-poule',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Format de l\'API', style: TextStyle(color: Colors.white70, fontSize: 13)),
+                  Text(
+                    'CKAN DataStore API',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 32),
+
+        // Slider for count to import
+        Text(
+          'Nombre de nids-de-poule à importer : ${_openDataImportLimit.toInt()}',
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Slider(
+          value: _openDataImportLimit,
+          min: 50,
+          max: 1000,
+          divisions: 19, // Division steps of 50
+          activeColor: AppColors.brandOrange,
+          inactiveColor: AppColors.brandBlackSoft,
+          onChanged: _openDataImporting
+              ? null
+              : (value) {
+                  setState(() {
+                    _openDataImportLimit = value;
+                  });
+                },
+        ),
+        const SizedBox(height: 40),
+
+        // Action Button
+        _openDataImporting
+            ? const Center(
+                child: Column(
+                  children: [
+                    CircularProgressIndicator(color: AppColors.brandOrange),
+                    SizedBox(height: 16),
+                    Text(
+                      'Connexion au portail de la ville et importation...',
+                      style: TextStyle(color: Colors.white70, fontSize: 13),
+                    ),
+                  ],
+                ),
+              )
+            : CivicButton(
+                label: 'Lancer l\'importation (API)',
+                icon: Icons.api_rounded,
+                onPressed: () async {
+                  setState(() {
+                    _openDataImporting = true;
+                  });
+                  try {
+                    final count = await ref
+                        .read(openDataServiceProvider)
+                        .ingestMontrealPotholes(_openDataImportLimit.toInt());
+                    setState(() {
+                      _openDataImportedCount = count;
+                    });
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Erreur d\'importation : $e'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  } finally {
+                    setState(() {
+                      _openDataImporting = false;
+                    });
+                  }
+                },
+              ),
+      ],
+    );
+  }
+
+  Widget _buildOpenDataSuccessView() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.15),
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.green, width: 2),
+              ),
+              child: const Icon(Icons.check, color: Colors.green, size: 40),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Importation réussie !',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+            const SizedBox(height: 12),
+            Text(
+              '$_openDataImportedCount nids-de-poule réels de la Ville de Montréal ont été importés avec succès par API et enregistrés sur la carte.',
+              style: const TextStyle(color: Colors.white70, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.brandOrange,
+                foregroundColor: Colors.white,
+                minimumSize: const Size(200, 48),
+              ),
+              onPressed: () {
+                setState(() {
+                  _openDataImportedCount = null;
                   _currentSubView = 'profile';
                 });
               },

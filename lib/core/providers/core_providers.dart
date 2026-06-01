@@ -17,6 +17,7 @@ import 'package:niddepoule/features/profile/domain/services/gamification_service
 import 'package:niddepoule/features/reports/data/services/report_service.dart';
 import 'package:niddepoule/features/reports/data/services/storage_service.dart';
 import 'package:niddepoule/features/reports/domain/services/pothole_merge_service.dart';
+import 'package:niddepoule/features/map/data/services/open_data_service.dart';
 
 final firebaseAuthProvider = Provider<FirebaseAuth>((_) => FirebaseAuth.instance);
 final firestoreProvider =
@@ -68,3 +69,7 @@ final potholeMergeServiceProvider =
     Provider<PotholeMergeService>((_) => const PotholeMergeService());
 final gamificationServiceProvider =
     Provider<GamificationService>((_) => GamificationService());
+
+final openDataServiceProvider = Provider<OpenDataService>((ref) {
+  return OpenDataService(ref.watch(firestoreProvider));
+});

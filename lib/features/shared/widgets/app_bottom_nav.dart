@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:niddepoule/app/design_system/app_colors.dart';
 
@@ -14,19 +13,16 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRect(
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-        child: Container(
-          decoration: BoxDecoration(
-            color: AppColors.brandBlack.withValues(alpha: 0.85), // Dynamic app background color
-            border: Border(
-              top: BorderSide(
-                color: AppColors.border.withValues(alpha: 0.3), // Dynamic border color
-                width: 0.5,
-              ),
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.brandBlack, // Dynamic app background color
+        border: Border(
+          top: BorderSide(
+            color: AppColors.border.withValues(alpha: 0.3), // Dynamic border color
+            width: 0.5,
           ),
+        ),
+      ),
           child: SafeArea(
             child: Container(
               height: 75,
@@ -44,10 +40,8 @@ class AppBottomNav extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
+        );
+      }
 
   Widget _buildNavItem(int index, IconData outlineIcon, IconData solidIcon, String label) {
     final isSelected = currentIndex == index;
