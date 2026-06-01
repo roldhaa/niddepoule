@@ -8,9 +8,35 @@ class OpenDataService {
 
   final FirebaseFirestore _firestore;
 
+  /// Clears all existing Montreal potholes from Firestore.
+  Future<void> clearMontrealPotholes() async {
+    final query = await _firestore
+        .collection('potholes')
+        .where('city', isEqualTo: 'Montréal')
+        .get();
+    if (query.docs.isEmpty) return;
+
+    WriteBatch batch = _firestore.batch();
+    int count = 0;
+    for (final doc in query.docs) {
+      batch.delete(doc.reference);
+      count++;
+      if (count % 400 == 0) {
+        await batch.commit();
+        batch = _firestore.batch();
+      }
+    }
+    if (count % 400 != 0) {
+      await batch.commit();
+    }
+  }
+
   /// Fetches real potholes from Montréal's 311 Citizen Requests dataset
   /// and seeds them in Firestore in batches of 400.
   Future<int> ingestMontrealPotholes(int limit) async {
+    // Clear old imported Montreal data first to guarantee consistency and remove repaired potholes
+    await clearMontrealPotholes();
+
     final client = HttpClient();
     try {
       final List<Map<String, dynamic>> parsedPotholes = [];
