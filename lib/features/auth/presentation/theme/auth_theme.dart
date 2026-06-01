@@ -2,12 +2,12 @@ import 'package:niddepoule/app/design_system/app_colors.dart';
 
 /// Alias retrocompatibilite — utiliser [AppColors] directement.
 abstract final class AuthTheme {
-  static const yellow = AppColors.brandYellow;
-  static const dark = AppColors.brandBlack;
-  static const darkSoft = AppColors.brandBlackSoft;
-  static const light = AppColors.surfaceElevated;
-  static const grey = AppColors.textSecondary;
-  static const error = AppColors.error;
-  static const gradient = AppColors.authGradient;
-  static const welcomeGradient = AppColors.welcomeGradient;
+  static get yellow => AppColors.brandYellow;
+  static get dark => AppColors.brandBlack;
+  static get darkSoft => AppColors.brandBlackSoft;
+  static get light => AppColors.surfaceElevated;
+  static get grey => AppColors.textSecondary;
+  static get error => AppColors.error;
+  static get gradient => AppColors.authGradient;
+  static get welcomeGradient => AppColors.welcomeGradient;
 }

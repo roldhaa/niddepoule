@@ -14,10 +14,16 @@ class MainNavigationScreen extends StatelessWidget {
       body: navShell,
       bottomNavigationBar: AppBottomNav(
         currentIndex: navShell.currentIndex,
-        onTap: (index) => navShell.goBranch(
-          index,
-          initialLocation: index == navShell.currentIndex,
-        ),
+        onTap: (index) {
+          if (index == 2) {
+            context.push('/report');
+          } else {
+            navShell.goBranch(
+              index,
+              initialLocation: index == navShell.currentIndex,
+            );
+          }
+        },
       ),
     );
   }

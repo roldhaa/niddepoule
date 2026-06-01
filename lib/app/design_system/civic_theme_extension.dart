@@ -18,7 +18,16 @@ class CivicThemeExtension extends ThemeExtension<CivicThemeExtension> {
   final Color dangerMedium;
   final Color dangerHigh;
 
-  static const light = CivicThemeExtension(
+  static final light = CivicThemeExtension(
+    brandYellow: AppColors.brandYellow,
+    brandBlack: AppColors.brandBlack,
+    surfaceMuted: AppColors.surfaceMuted,
+    dangerLow: AppColors.dangerLow,
+    dangerMedium: AppColors.dangerMedium,
+    dangerHigh: AppColors.dangerHigh,
+  );
+
+  static final dark = CivicThemeExtension(
     brandYellow: AppColors.brandYellow,
     brandBlack: AppColors.brandBlack,
     surfaceMuted: AppColors.surfaceMuted,

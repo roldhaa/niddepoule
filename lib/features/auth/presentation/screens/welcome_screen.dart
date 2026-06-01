@@ -11,7 +11,7 @@ class WelcomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.welcomeGradient),
+        decoration: BoxDecoration(gradient: AppColors.welcomeGradient),
         child: SafeArea(
           child: SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xl),
@@ -36,7 +36,7 @@ class WelcomeScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Icons.add_road_rounded,
                       size: 56,
                       color: AppColors.brandBlack,

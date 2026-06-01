@@ -9,7 +9,21 @@ final authStateProvider = StreamProvider<UserProfile?>((ref) {
 
 /// Utilisateur connecte courant.
 final currentUserProvider = Provider<UserProfile?>((ref) {
-  return ref.watch(authStateProvider).valueOrNull;
+  final authState = ref.watch(authStateProvider);
+  if (authState.hasValue && authState.value != null) {
+    return authState.value;
+  }
+  final fbUser = ref.watch(firebaseAuthProvider).currentUser;
+  if (fbUser != null) {
+    return UserProfile(
+      uid: fbUser.uid,
+      fullName: fbUser.displayName ?? 'Citoyen CivicRoad',
+      email: fbUser.email ?? '',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+  return null;
 });
 
 class AuthController extends StateNotifier<AsyncValue<void>> {

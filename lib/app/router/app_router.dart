@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:niddepoule/core/providers/core_providers.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:niddepoule/app/design_system/app_durations.dart';
@@ -8,6 +10,7 @@ import 'package:niddepoule/features/auth/presentation/screens/register_screen.da
 import 'package:niddepoule/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:niddepoule/features/feed/presentation/screens/feed_screen.dart';
 import 'package:niddepoule/features/map/presentation/screens/map_screen.dart';
+import 'package:niddepoule/features/alerts/presentation/screens/alerts_screen.dart';
 import 'package:niddepoule/features/potholes/presentation/screens/pothole_details_screen.dart';
 import 'package:niddepoule/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:niddepoule/features/profile/presentation/screens/profile_screen.dart';
@@ -49,8 +52,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/welcome',
+    refreshListenable: GoRouterRefreshStream(
+      ref.watch(firebaseAuthProvider).authStateChanges(),
+    ),
     redirect: (context, state) {
-      final user = ref.read(authStateProvider).valueOrNull;
+      final user = ref.read(firebaseAuthProvider).currentUser;
       final path = state.fullPath ?? '';
       final isAuthRoute =
           path == '/welcome' || path == '/login' || path == '/register';
@@ -71,6 +77,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/register',
         builder: (context, state) => const RegisterScreen(),
       ),
+      GoRoute(
+        parentNavigatorKey: _rootNavigatorKey,
+        path: '/report',
+        pageBuilder: (context, state) => _fadeSlidePage(
+          key: state.pageKey,
+          child: ReportPotholeScreen(
+            potholeId: state.uri.queryParameters['potholeId'],
+            redirectPath: state.uri.queryParameters['redirect'],
+          ),
+        ),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navShell) =>
             MainNavigationScreen(navShell: navShell),
@@ -80,6 +97,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: '/home/map',
                 builder: (context, state) => const MapScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home/feed',
+                builder: (context, state) => const FeedScreen(),
               ),
             ],
           ),
@@ -97,8 +122,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           StatefulShellBranch(
             routes: [
               GoRoute(
-                path: '/home/feed',
-                builder: (context, state) => const FeedScreen(),
+                path: '/home/alerts',
+                builder: (context, state) => const AlertsScreen(),
               ),
             ],
           ),
@@ -144,3 +169,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 });
+
+class GoRouterRefreshStream extends ChangeNotifier {
+  GoRouterRefreshStream(Stream<dynamic> stream) {
+    notifyListeners();
+    _subscription = stream.asBroadcastStream().listen(
+          (dynamic _) => notifyListeners(),
+        );
+  }
+
+  late final StreamSubscription<dynamic> _subscription;
+
+  @override
+  void dispose() {
+    _subscription.cancel();
+    super.dispose();
+  }
+}

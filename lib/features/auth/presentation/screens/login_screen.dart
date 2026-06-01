@@ -124,7 +124,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     'S\'inscrire',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppColors.brandBlack,
+                      color: AppColors.brandOrange,
                     ),
                   ),
                 ),

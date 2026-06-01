@@ -24,7 +24,7 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: const BoxDecoration(gradient: AppColors.authGradient),
+        decoration: BoxDecoration(gradient: AppColors.authGradient),
         child: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,7 +58,7 @@ class AuthScaffold extends StatelessWidget {
                             color: AppColors.brandYellow,
                             borderRadius: BorderRadius.circular(14),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.add_road_rounded,
                             color: AppColors.brandBlack,
                             size: 28,
@@ -107,8 +107,8 @@ class AuthScaffold extends StatelessWidget {
                   ),
                   child: Container(
                     width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: AppColors.surfaceElevated,
+                    decoration: BoxDecoration(
+                      color: AppColors.brandBlack,
                       borderRadius: BorderRadius.vertical(
                         top: Radius.circular(AppRadius.sheet),
                       ),

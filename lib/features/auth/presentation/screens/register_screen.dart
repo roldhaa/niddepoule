@@ -148,7 +148,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     'Se connecter',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: AppColors.brandBlack,
+                      color: AppColors.brandOrange,
                     ),
                   ),
                 ),

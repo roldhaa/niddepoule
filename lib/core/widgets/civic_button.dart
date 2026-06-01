@@ -86,28 +86,28 @@ class CivicButton extends StatelessWidget {
   (Color bg, Color fg, Border? border) _colors() {
     return switch (variant) {
       CivicButtonVariant.primary => (
-          AppColors.brandBlack,
-          AppColors.textOnDark,
+          AppColors.brandOrange,
+          Colors.white,
           null,
         ),
       CivicButtonVariant.secondary => (
           AppColors.surface,
-          AppColors.brandBlack,
-          Border.all(color: AppColors.brandBlack, width: 1.5),
+          AppColors.textPrimary,
+          Border.all(color: AppColors.border, width: 1.5),
         ),
       CivicButtonVariant.accent => (
           AppColors.brandYellow,
-          AppColors.brandBlack,
+          const Color(0xFF0B0C0F),
           null,
         ),
       CivicButtonVariant.ghost => (
           Colors.transparent,
-          AppColors.textOnDark,
-          Border.all(color: AppColors.textOnDark, width: 2),
+          AppColors.textPrimary,
+          Border.all(color: AppColors.border, width: 1.5),
         ),
       CivicButtonVariant.danger => (
           AppColors.error,
-          AppColors.textOnDark,
+          Colors.white,
           null,
         ),
     };

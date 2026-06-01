@@ -45,5 +45,11 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>L'application a besoin d'accéder à l'appareil photo pour signaler les nids-de-poule.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>L'application a besoin de l'accès au microphone pour l'enregistrement.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>L'application a besoin d'accéder à la galerie pour charger des photos de nids-de-poule.</string>
 </dict>
 </plist>

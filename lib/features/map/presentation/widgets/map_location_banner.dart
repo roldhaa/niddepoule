@@ -23,7 +23,7 @@ class MapLocationBanner extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(Icons.gps_fixed, color: AppColors.brandYellow, size: 18),
+          Icon(Icons.gps_fixed, color: AppColors.brandYellow, size: 18),
           AppSpacing.gapH(AppSpacing.sm),
           Expanded(
             child: Text(
